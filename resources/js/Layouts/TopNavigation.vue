@@ -6,7 +6,7 @@
         </Link> -->
         <div class="flex items-center justify-between h-full">
             <Link href="/" class="w-[105px] ml-6 cursor-pointer">
-            <img src="/logo-plain.svg" viewbox="0 0 80 80" width="80" height="80"/>
+            <img src="/logo/logo-plain.svg" viewbox="0 0 80 80" width="80" height="80"/>
             </Link>
 
             <div class="flex items-center w-[50%]">
