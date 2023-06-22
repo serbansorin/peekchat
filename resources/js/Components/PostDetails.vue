@@ -11,7 +11,7 @@ import CommentRemoveOutline from 'vue-material-design-icons/CommentRemoveOutline
 import EmoticonHappyOutline from 'vue-material-design-icons/EmoticonHappyOutline.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 
-const comment = ref('')
+const typedText = ref('')
 
 const user = usePage().props.auth.user;
 
@@ -24,6 +24,7 @@ const props = defineProps({
 const { post, openOverlay, posts } = toRefs(props);
 
 
+// const reactivePost = reactive(post.value);
 
 // MODAL
 const modal = computed(() => props.openOverlay).value;
@@ -47,33 +48,32 @@ const showDeleteCommentModal = ref(false);
 const deleteComment = (comment) => {
     showDeleteCommentModal.value = false;
     router.delete(`/comments/${comment.id}`, {
+        only: () => ['comments', 'posts'],
         onFinish: () => removeCommentFromPost(comment),
     });
 };
 
 const addComment = (comment) => {
-    console.log(comment, 'comment');
-    router.post('/comments', {
+    axios.post('/comments', {
         post_id: comment.post.id,
         user_id: comment.user.id,
-        comment: comment.comment
-    }, {
-        only: () => ['post'],
-        onSuccess: () => {
-            appendCommentToPost(comment);
-            // console.log(post, 'POST');
+        text: typedText.value
+    }).then((res) => {
 
+        if (res.status === 200) {
+            appendCommentToPost(res.data.comment);
+            typedText.value = '';
+            // post.value.comments = res.data.comments;
+            console.log(res.data, 'POST');
         }
-    }
-    )
+    })
 }
 
 const appendCommentToPost = (comment) => {
     post.value.comments.push({
-        id: post.value.comments.length + 1,
-        text: comment.comment,
-        user: comment.user,
-
+        id: comment.id,
+        text: typedText.value,
+        user: comment.user
     });
 }
 
@@ -82,6 +82,8 @@ const removeCommentFromPost = (comment) => {
         (c) => c.id !== comment.id
     )
 }
+
+
 
 // TEXTAREA SECTION
 const textarea = ref('');
@@ -182,7 +184,7 @@ const textareaInput = (e) => {
 
                         <div class="absolute flex border bottom-0 w-full max-h-[200px] bg-white overflow-auto">
                             <EmoticonHappyOutline class="pl-3 pt-[10px]" :size="30" />
-                            <textarea ref="textarea" :oninput="textareaInput" v-model="comment"
+                            <textarea ref="textarea" :oninput="textareaInput" v-model="typedText"
                                 placeholder="Add a comment..." rows="1" class="
                                                         w-full
                                                         border-0
@@ -194,8 +196,8 @@ const textareaInput = (e) => {
                                                         text-gray-600
                                                         text-[18px]
                                                     "></textarea>
-                            <button v-if="comment.length" class="text-blue-600 font-extrabold pr-4"
-                                @click="addComment({ post, user, comment })">
+                            <button v-if="typedText.length" class="text-blue-600 font-extrabold pr-4"
+                                @click="addComment({ post, user})">
                                 Post
                             </button>
                         </div>

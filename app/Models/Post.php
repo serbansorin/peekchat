@@ -32,4 +32,10 @@ class Post extends Model
     {
         return $this->hasMany(Like::class);
     }
+
+    public function scopeCommentsById($query, $id)
+    {
+        return $query->where('id', $id)->comments()->orderBy('created_at', 'asc');
+    }
+
 }

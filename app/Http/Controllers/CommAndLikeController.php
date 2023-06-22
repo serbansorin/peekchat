@@ -44,6 +44,13 @@ class CommAndLikeController extends Controller
         return redirect()->route('home.index');
     }
 
+    public function getPostComments($id)
+    {
+        $post = Post::findOrFail($id);
+        $comments = $post->comments()->get();
+
+        return $comments;
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -54,10 +61,14 @@ class CommAndLikeController extends Controller
         $comment = Comment::create([
             'post_id' => $request->input('post_id'),
             'user_id' => $request->input('user_id'),
-            'text' => $request->input('comment')
+            'text' => $request->input('text')
         ]);
 
-        return redirect()->route('home.index');
+        // return dump($comment->with('user')->first()->toArray());
+
+        return response()->json(['comment' => $comment->with('user')->first()->toArray()]);
+
+        // return redirect()->route('home.index');
     }
 
     /**

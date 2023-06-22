@@ -31,7 +31,7 @@ class CommentCreateRequest extends FormRequest
         return [
             'post_id' => 'required',
             'user_id' => 'required',
-            'comment' => 'required',
+            'text' => 'required',
         ];
     }
 }
