@@ -24,7 +24,7 @@ const randomUsers = $page.props.randomUsers;
 
 
         <div id="SideNav" v-if="$page.url == '/'"
-            class="fixed h-full xl:w-[200px] w-[50px] md:block hidden tiling-card">
+            class="fixed h-full xl:w-[200px] w-[100px] md:block hidden tiling-card">
             <Link href="/">
             <img class="xl:hidden block w-[25px] mt-10 ml-[25px] mb-10 cursor-pointer" src="/logo/logo-plain.svg"
 

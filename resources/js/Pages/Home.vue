@@ -1,7 +1,7 @@
 <script setup>
 import CarouselUsers from './CarouselUsers.vue'
 import { ref, onMounted, toRefs, reactive } from 'vue'
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 
 import LikesSection from '@/Components/LikesSection.vue';
@@ -34,6 +34,8 @@ console.log(_.isNull(allUsers.value));
 const allPosts = ref(props.posts.data);
 console.log(allPosts.value);
 
+const user = usePage().props?.auth?.user;
+
 
 const deletePost = (object) => {
     router.delete('/posts/' + object.id, {
@@ -52,7 +54,19 @@ const confirmModal = ref({
     title: 'Delete Post',
 });
 
+const alertIfUserIsNotPostOwner = (post) => {
+    if (user.id !== post.user.id) {
+        alert('You are not the owner of this post');
+        return false;
+    }
+    return true;
+};
+
 const openModalDeletePost = (show, post = null) => {
+    if (!alertIfUserIsNotPostOwner(post)) {
+        return;
+    }
+
     confirmModal.value.show = show;
     confirmModal.value.title = 'Delete Post';
     confirmModal.value.text = 'You are about to delete this post. Are you sure?';
