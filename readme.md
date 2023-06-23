@@ -6,17 +6,17 @@ Welcome to PeekChat! This document will guide you through the installation proce
 
 Before getting started, please ensure that you have the following installed on your system:
 
-- PHP (version >= 8.1)
-- Composer (version >= 2.5.*)
-- Node.js (version >= 16)
-- npm (version >= 8.1.*)
+- PHP (version 8.1.*)
+- Composer (version ^2.5.*)
+- Node.js (version ^16.*)
+- npm (version ^8.*)
 
 ## Installation
 
 1. Clone the repository:
 
  ```shell
- git clone https://github.com/your-username/peekchat.git
+ git clone https://github.com/serbansorin/peekchat.git
  ```
 
 2. Change into the project directory:
@@ -28,13 +28,13 @@ Before getting started, please ensure that you have the following installed on y
 3. Install PHP dependencies using Composer (ignoring platform requirements):
 
  ```shell
- composer install --ignore-platform-reqs
+ composer install # or with --ignore-platform-reqs
  ```
 
 4. Install JavaScript dependencies using npm:
 
 ```shell
-npm install
+npm ci # or npm install if no package lock present
 ```
 
 ## Usage
@@ -44,7 +44,7 @@ To start using PeekChat, follow these steps:
 1. Start the Vite development server:
 
 ```shell
-npm run dev
+npm run dev # this will watch for any changes
 ```
 
 This command will start the Vite development server for PeekChat.
@@ -66,7 +66,7 @@ This will open the PeekChat application in your browser.
 To build the project for production, run the following command:
 
 ```shell
-npm run build
+npm run build # will build all files needed in the public directory
 ```
 
 This command will generate optimized and minified files in the `dist` directory.
