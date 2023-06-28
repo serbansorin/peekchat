@@ -31,6 +31,9 @@ Route::middleware('auth')->group(function () {
     // Home page of logged User - All Posts
     Route::get('/', [PostController::class, 'index'])->name('home.index');
 
+    # Events
+    Route::get('/events', [CommAndLikeController::class, 'eventsIndex'])->name('events.index');
+
     # Profile page of logged User
 
     Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
@@ -79,6 +82,7 @@ Route::middleware('auth')->group(function () {
 
     // send message
     Route::post('/send-message', [MessagesController::class, 'sendMessage'])->name('messages.send');
+    Route::post('/messages/store', [MessagesController::class, 'storeMessage'])->name('messages.store');
 
     ## Friends
     // follow request

@@ -20,19 +20,25 @@ const { iconString } = toRefs(props)
 
 const user = usePage().props.auth.user
 
-let icon = null
+const getIcon = (iconName) => {
+  switch (iconName) {
+    case 'Home': return HomeOutline
+    case 'Search': return Magnify
+    case 'Explore': return Compass
+    case 'Messages': return ChatProcessingOutline
+    case 'Events': return Compass
+    case 'Notifications':
+    case 'Post': return MessageOutline
+    case 'Create': return HeartOutline
+    case 'Profile': return AccountOutline
+    case 'Logout': return LogoutIcon
+    case 'Chat': return ChatProcessingOutline
+    default: return null
+  }
+}
 
-if (iconString.value === 'Home') icon = HomeOutline
-if (iconString.value === 'Search') icon = Magnify
-if (iconString.value === 'Explore') icon = Compass
-if (iconString.value === 'Messages') icon = ChatProcessingOutline
-if (iconString.value === 'Events') icon = HeartOutline
-if (iconString.value === 'Notifications') icon = HeartOutline
-if (iconString.value === 'Create') icon = Plus
-if (iconString.value === 'Post') icon = Plus
-if (iconString.value === 'Profile') icon = AccountOutline
-if (iconString.value === 'Logout') icon = LogoutIcon
-if (iconString.value === 'Chat') icon = ChatProcessingOutline
+const icon = getIcon(iconString.value)
+
 
 </script>
 

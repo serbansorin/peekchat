@@ -22,7 +22,7 @@ class StoreMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'content' => ['required', 'string'],
+            'text' => ['required', 'string'],
             'chat_id' => ['required', 'string'],
             // file can be null or image
             'file' => ['nullable', 'mimes:png,jpg,jpeg', 'max:2048'],

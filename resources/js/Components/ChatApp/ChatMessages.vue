@@ -11,7 +11,7 @@
             </div>
             <div v-for="message in messages" :key="message" ref="elements">
 
-                <div class="flex-row max-w-[70%] rounded py-[1px] mb-4"
+                <div class="flex-row max-w-[70%] w-fit rounded py-[1px] mb-4"
                     :class="message.user_id === currentUser.id ? 'bg-gray-300 ml-auto' : 'bg-gray-200 mr-auto'">
 
                     <div class="rounded-md py-1 mx-2 text-sm"
@@ -31,6 +31,7 @@
                 class="w-full p-4 rounded-lg" placeholder="Type your message here..." />
             <div class="flex justify-end">
                 <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                :disabled="!newMessage"
                     @click="sendMessage">Send</button>
             </div>
         </div>
@@ -50,6 +51,7 @@
     border-radius: 10px;
     min-width: 800px;
     margin: 10px;
+    width: min-content;
 
 }
 
@@ -99,6 +101,8 @@ import { usePage, router } from '@inertiajs/vue3';
 import { ref, toRefs, defineEmits, computed, onMounted, watch } from 'vue';
 // import axios from 'axios';
 import { io } from 'socket.io-client';
+// import { isEmpty } from './../../helpers';
+
 
 router.reload(['messages'], { replace: true });
 
@@ -125,7 +129,7 @@ const { messages, currentUser, chat_id, currentChatRoom } = toRefs(props);
 const user = computed(() => usePage().props.auth.user).value;
 const socket = io("http://localhost:3000");
 
-
+// Declare message
 const newMessage = ref('');
 
 const currentMessage = ref({
@@ -141,7 +145,7 @@ console.log(chat_id.value, 'chat_id');
 // save message
 const saveMessage = (message, user) => {
     router.post(route('messages.send'), {
-        content: message,
+        text: message,
         user: user.id,
         chat_id: chat_id.value,
         users_list: currentChatRoom.value.users_list
@@ -155,16 +159,34 @@ const saveMessage = (message, user) => {
     });
 }
 
+const storeMessageAxios = (message, user) => {
+    axios.post(route('messages.store'), {
+        text: message,
+        user_id: user.id,
+        chat_id: chat_id.value,
+    }).then((response) => {
+        if (response.status === 200) {
+            console.log(response.data.messages, 'MESAJUL AU FOST STOCAT');
+            messages.value = response.data.messages;
+        }
+    }).catch((error) => {
+        console.log(error);
+    });
+}
+
 socket.on('new-message', msg => {
-    console.log(msg, 'MESAJUL A FOST PRIMIT');
-    appendMessage(msg);
+    if (msg.chat_id === chat_id.value) {
+
+        console.log(msg, 'MESAJUL A FOST PRIMIT');
+        appendMessage(msg);
+    }
 });
 
 const emitMessage = () => {
     socket.emit('new-message', currentMessage.value);
 
     // emit('send', {
-    //     content: newMessage.value,
+    //     text: newMessage.value,
     //     user_id: user.id,
     //     chat_id: chat_id.value,
     //     chatRoom: currentChatRoom.value
@@ -177,8 +199,18 @@ const appendMessage = (msg) => {
 
 
 const sendMessage = () => {
+    if (newMessage.value === '') {
+        alert('You must write a message');
+        return;
+    }
+    if (_.isEmpty(chat_id.value)) {
+        // send toast error alert
+        alert('You must select a chat');
+        return;
+    }
     currentMessage.value.text = newMessage.value;
-    emitMessage();
+    // emitMessage();
+    storeMessageAxios(newMessage.value, user);
 
     socket.emit('send-message', currentMessage.value);
 
@@ -189,10 +221,9 @@ const sendMessage = () => {
 
 
 
-// SCROLL TO BOTTOM
+// AUTO SCROLL TO BOTTOM
 
 const elements = ref(null);
-
 
 const chatarea = ref(null);
 const msgbox = ref();
@@ -206,19 +237,10 @@ onMounted(() => {
 
     console.log(chat, 'chat');
     console.log(chatarea.value, 'msgbox');
+    scrollToBottom();
+
 });
 
-const getLastElementHeightFromElements = () => {
-    return elements.value[elements.value.length - 1].scrollHeight;
-};
-
-// watch(
-//     newMessage.value,
-//     // Scroll to bottom
-//     () => {
-
-//     }
-// );
 
 const scrollToBottom = () => {
     const shouldScroll =
@@ -227,14 +249,27 @@ const scrollToBottom = () => {
 
 
     setTimeout(() => {
-            if (chatarea.value) {
-                chatarea.value.scrollTop = chatarea.value.scrollHeight - chatarea.value.clientHeight;
-            }
-        }, 100);
+        if (chatarea.value) {
+            chatarea.value.scrollTop = chatarea.value.scrollHeight - chatarea.value.clientHeight;
+        }
+    }, 100);
 }
 
-function isset(element) {
-    return element !== null && element !== undefined;
-}
+
+
+// Watchers
+
+watch(
+    // Scroll to bottom
+    () => {
+        console.log('chat_id.value in WATCH', chat_id.value);
+        setTimeout(() => {
+            scrollToBottom();
+        }, 200);
+    }
+);
+
+// Helpers
+
 
 </script>

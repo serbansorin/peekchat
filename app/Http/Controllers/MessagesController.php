@@ -72,12 +72,31 @@ class MessagesController extends Controller
      */
     public function storeMessage(StoreMessageRequest $request)
     {
-        $message = Messages::create([
-            'user_id' => $this->user->id,
-            'text' => $request->input('content'),
-        ]);
+        if( null == $chat_id = $request->input('chat_id')) {
+            return response(['error' => 'chat_id is missing'], 400);
+        }
+        if (null == $text = $request->input('text')) {
+            return response(['error' => 'content is missing'], 400);
+        }
 
-        return response()->json($message);
+        $this->setOrFailUser();
+        if ($this->user->id != $request->input('user_id')) {
+            return response(['error' => 'user_id is not correct or not this user'], 400);
+        }
+
+        $msg = Messages::where('chat_id', $chat_id)->where('user_id', $this->user->id)->first();
+        if ($msg) {
+            $msg->newChatMessage($text);
+        }
+
+        // $message = Messages::create([
+        //     'user_id' => $this->user->id,
+        //     'friend_id' => $msg->friend_id ?? null,
+        //     'text' => $text,
+        //     'chat_id' => $chat_id,
+        // ]);
+
+        return response()->json(['messages' => Messages::where('chat_id', $chat_id)->get()->toArray()], 200);
     }
 
 

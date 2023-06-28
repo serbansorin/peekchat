@@ -1,11 +1,10 @@
 /.phpunit.cache
 /bootstrap/ssr
 /node_modules
-/public
+/public/**/*
 /public/build
 /public/hot
 /public/storage
-!/public/logo/*
 /storage/*.key
 /vendor
 .env
@@ -20,3 +19,4 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+!/public/logo/

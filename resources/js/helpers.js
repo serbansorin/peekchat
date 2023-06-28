@@ -229,6 +229,7 @@ export default {
     isWeakMap,
     isNullish,
     isTruthy,
+    isEmpty,
 }
 
 // export default() => {

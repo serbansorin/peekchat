@@ -35,7 +35,6 @@
 <script setup>
 import ContactSlide from '@/Components/ChatApp/ContactSlide.vue';
 import { usePage, router } from '@inertiajs/vue3';
-// import ChatBox from './ChatBox.vue';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import { computed, reactive, ref, toRefs } from 'vue';
 import ChatMessages from '@/Components/ChatApp/ChatMessages.vue';

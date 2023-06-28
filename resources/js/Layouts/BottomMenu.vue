@@ -1,11 +1,11 @@
 <template>
     <div class="flex fixed bottom-0 bg-white w-[100%] h-[60px]"
-    v-if="$page.props.auth.user && $page.props.auth.user.id"
+    v-if="$page.props.auth.user && $page.props.auth.user.id && !route().current('home.index') "
     >
 
         <div
             class="z-30 bottom-0 ml-4 gap-12 h-[60px] flex justify-between items-center bg-white border-t px-2 py-2 border-t-gray-300">
-            <Link href="/home">
+            <Link href="/">
             <HomeOutline fillColor="#000000" :size="33" class="cursor-pointer" />
             </Link>
             <Compass fillColor="#000000" :size="33" class="cursor-pointer" />

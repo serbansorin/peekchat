@@ -226,4 +226,15 @@ class Messages extends Model
     }
 
 
+    public function newChatMessage($text)
+    {
+
+        return Messages::create([
+            'user_id' => $this->user_id,
+            'user_name' => $this->user_name,
+            'friend_id' => $this->friend_id,
+            'chat_id' => $this->chat_id,
+            'text' => $text,
+        ]);
+    }
 }

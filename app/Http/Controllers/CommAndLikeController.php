@@ -5,9 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CommentCreateRequest;
 use App\Models\Comment;
 use App\Models\Like;
-use App\Models\Messages;
-use App\Http\Requests\StoreMessageRequest;
-use App\Http\Requests\UpdateMessageRequest;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,6 +12,10 @@ use Inertia\Inertia;
 class CommAndLikeController extends Controller
 {
 
+    public function eventsIndex()
+    {
+      return Inertia::render('Events');
+    }
 
     /**
      * Store a newly created resource in storage communication.

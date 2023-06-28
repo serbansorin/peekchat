@@ -13,7 +13,7 @@ const props = defineProps({
 
 </style>
 
-<<template>
+<template>
     <main-layout>
         <upcoming-events>
 
