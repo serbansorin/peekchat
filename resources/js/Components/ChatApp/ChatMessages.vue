@@ -49,9 +49,18 @@
     /* border: 1px solid #656565; */
     box-shadow: 10px 1px 10px #656565;
     border-radius: 10px;
-    min-width: 800px;
+    min-width: 600px;
     margin: 10px;
-    width: min-content;
+    width: calc(50vw);
+
+    @media screen and (max-width: 1025px) {
+        width: calc(90vw - 10px);
+        margin-left: calc(5vw);
+        margin-right: 20px;
+        padding-right: 10px;
+        min-width: fit-content;
+
+    }
 
 }
 
@@ -98,7 +107,7 @@
 
 <script setup>
 import { usePage, router } from '@inertiajs/vue3';
-import { ref, toRefs, defineEmits, computed, onMounted, watch } from 'vue';
+import { ref, toRefs, defineEmits, computed, onMounted, watch, reactive } from 'vue';
 // import axios from 'axios';
 import { io } from 'socket.io-client';
 // import { isEmpty } from './../../helpers';
@@ -122,7 +131,7 @@ const props = defineProps({
     chat_id: String
 })
 
-const { messages, currentUser, chat_id, currentChatRoom } = toRefs(props);
+const { messages, chat_id, currentChatRoom } = toRefs(props);
 
 
 // EMIT MESSAGES
@@ -136,13 +145,121 @@ const currentMessage = ref({
     text: '',
     user_id: user.id,
     user_name: user.name,
-    chat_id: chat_id.value
+    chat_id: props?.chat_id
 });
 
 
-console.log(chat_id.value, 'chat_id');
+const storeMessageAxios = (message, user) => {
+    axios.post(route('messages.store'), {
+        text: message,
+        user_id: user.id,
+        chat_id: chat_id.value,
+    }).then((response) => {
+        if (response.status === 200) {
+            console.log(response.data.messages, 'MESAJUL A FOST STOCAT');
+            messages.value = response.data.messages;
+        }
+    }).catch((error) => {
+        console.log(error);
+    });
+}
+
+socket.on('new-message', msg => {
+    console.log(msg.chat_id, 'MESAJUL A FOST PRIMIT');
+    console.log(props.chat_id, 'MESAJUL A FOST PRIMIT');
+
+    if (msg.chat_id == props.chat_id) {
+
+        console.log(msg, 'MESAJUL A FOST PRIMIT');
+        appendMessage(msg);
+    }
+});
+
+const emitMessage = () => {
+    // socket.emit('new-message', currentMessage.value);
+
+    emit('send', {
+        text: newMessage.value,
+        user_id: user.id,
+        chat_id: chat_id.value,
+        chatRoom: currentChatRoom.value
+    })
+}
+
+const appendMessage = (msg) => {
+    messages.value.push(msg);
+}
+
+
+const sendMessage = () => {
+
+    if (_.isEmpty(chat_id.value)) {
+        // send toast error alert
+        alert('You must select a chat');
+        return;
+    }
+    console.log('chat_id.value in ChatMessages', chat_id.value);
+
+    currentMessage.value.text = newMessage.value;
+    // emitMessage();
+    storeMessageAxios(newMessage.value, user);
+
+    socket.emit('send-message', currentMessage.value);
+
+    newMessage.value = '';
+    scrollToBottom();
+
+}
+
+// AUTO SCROLL TO BOTTOM
+
+const elements = ref(null);
+
+const chatarea = ref(null);
+const msgbox = ref();
+const chat = document.getElementById('messages');
+
+msgbox.value = document.getElementById('messages');
+
+
+const scrollToBottom = () => {
+    const shouldScroll =
+        chatarea.value.scrollTop + chatarea.value.clientHeight !==
+        chatarea.value.scrollHeight;
+
+
+    setTimeout(() => {
+        if (chatarea.value) {
+            chatarea.value.scrollTop = chatarea.value.scrollHeight - chatarea.value.clientHeight;
+        }
+    }, 100);
+}
+
+// if page refreshed scroll to bottom
+onMounted(() => {
+    scrollToBottom();
+})
+// Watchers
+
+watch(
+    // Scroll to bottom
+    chat_id,
+    () => {
+        console.log('chat_id.value in WATCH', chat_id.value);
+        setTimeout(() => {
+            scrollToBottom();
+        }, 300);
+    }
+);
+
+// Helpers
 
 // save message
+
+/* OTHERS
+
+
+
 const saveMessage = (message, user) => {
     router.post(route('messages.send'), {
         text: message,
@@ -159,117 +276,9 @@ const saveMessage = (message, user) => {
     });
 }
 
-const storeMessageAxios = (message, user) => {
-    axios.post(route('messages.store'), {
-        text: message,
-        user_id: user.id,
-        chat_id: chat_id.value,
-    }).then((response) => {
-        if (response.status === 200) {
-            console.log(response.data.messages, 'MESAJUL AU FOST STOCAT');
-            messages.value = response.data.messages;
-        }
-    }).catch((error) => {
-        console.log(error);
-    });
-}
-
-socket.on('new-message', msg => {
-    if (msg.chat_id === chat_id.value) {
-
-        console.log(msg, 'MESAJUL A FOST PRIMIT');
-        appendMessage(msg);
-    }
-});
-
-const emitMessage = () => {
-    socket.emit('new-message', currentMessage.value);
-
-    // emit('send', {
-    //     text: newMessage.value,
-    //     user_id: user.id,
-    //     chat_id: chat_id.value,
-    //     chatRoom: currentChatRoom.value
-    // })
-}
-
-const appendMessage = (msg) => {
-    messages.value.push(msg);
-}
-
-
-const sendMessage = () => {
-    if (newMessage.value === '') {
-        alert('You must write a message');
-        return;
-    }
-    if (_.isEmpty(chat_id.value)) {
-        // send toast error alert
-        alert('You must select a chat');
-        return;
-    }
-    currentMessage.value.text = newMessage.value;
-    // emitMessage();
-    storeMessageAxios(newMessage.value, user);
-
-    socket.emit('send-message', currentMessage.value);
-
-    newMessage.value = '';
-    scrollToBottom();
-
-}
 
 
 
-// AUTO SCROLL TO BOTTOM
 
-const elements = ref(null);
-
-const chatarea = ref(null);
-const msgbox = ref();
-const chat = document.getElementById('messages');
-
-msgbox.value = document.getElementById('messages');
-
-
-onMounted(() => {
-    console.log(elements.value, 'ELEMENTS');
-
-    console.log(chat, 'chat');
-    console.log(chatarea.value, 'msgbox');
-    scrollToBottom();
-
-});
-
-
-const scrollToBottom = () => {
-    const shouldScroll =
-        chatarea.value.scrollTop + chatarea.value.clientHeight !==
-        chatarea.value.scrollHeight;
-
-
-    setTimeout(() => {
-        if (chatarea.value) {
-            chatarea.value.scrollTop = chatarea.value.scrollHeight - chatarea.value.clientHeight;
-        }
-    }, 100);
-}
-
-
-
-// Watchers
-
-watch(
-    // Scroll to bottom
-    () => {
-        console.log('chat_id.value in WATCH', chat_id.value);
-        setTimeout(() => {
-            scrollToBottom();
-        }, 200);
-    }
-);
-
-// Helpers
-
-
+*/
 </script>

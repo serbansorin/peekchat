@@ -1,11 +1,11 @@
 <template>
     <div v-if="route().current('home.index')" id="TopNavHome"
-        class="fixed z-30 block w-full bg-white h-[61px] border-b border-b-gray-300">
+        class=" z-30 block w-full bg-white h-[50px] border-b border-b-gray-300">
         <!-- <Link href="/" class="px-4">
         <ChevronLeft :size="30" class="cursor-pointer" />
         </Link> -->
-        <div class="flex items-center justify-between h-full">
-            <Link href="/" class="w-[105px] ml-6 cursor-pointer">
+        <div class="flex items-center justify-center h-full">
+            <Link href="/" class="w-[50px] ml-6 cursor-pointer">
             <img src="/logo/logo-plain.svg" viewbox="0 0 80 80" width="80" height="80"/>
             </Link>
 
