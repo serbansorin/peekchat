@@ -1,5 +1,4 @@
 <script setup>
-import CarouselUsers from './CarouselUsers.vue'
 import { ref, onMounted, toRefs, reactive } from 'vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
@@ -7,9 +6,6 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import LikesSection from '@/Components/LikesSection.vue';
 import PostDetails from '@/Components/PostDetails.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
-
-import 'vue3-carousel/dist/carousel.css'
-import { Carousel, Slide, Navigation } from 'vue3-carousel'
 
 import DotsHorizontal from 'vue-material-design-icons/NoteRemoveOutline.vue';
 
