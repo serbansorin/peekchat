@@ -4,10 +4,10 @@
             <!-- // show empty box if no messages -->
             <div v-if="messages.length === 0" class="flex flex-col items-center justify-center">
                 <div class="text-2xl font-bold">No messages yet</div>
-                <div class="text-gray-500">Start a conversation by clicking on a user and typing a message below</div>
+                <div class="text-gray-500">Start typing a message below</div>
             </div>
             <div v-else class="flex flex-col items-center justify-center">
-                <div class="text-2xl font-bold bg-blue-300 rounded py-2 px-4 mb-4">Title: {{ currentChatRoom.name }}</div>
+                <div class="text-2xl font-bold bg-blue-300 rounded py-2 px-4 mb-4">{{ currentChatRoom.name }}</div>
             </div>
             <div v-for="message in messages" :key="message" ref="elements">
 
@@ -27,11 +27,11 @@
             </div>
         </div>
         <div class="input-area flex h-[60px] gap-4">
-            <input type="text" :ref="currentMessage.text" v-model="newMessage" @keyup.enter="sendMessage"
+            <input type="text" v-model="currentMessage.text" @keyup.enter="sendMessage"
                 class="w-full p-4 rounded-lg" placeholder="Type your message here..." />
             <div class="flex justify-end">
                 <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                :disabled="!newMessage"
+                :disabled="!currentMessage?.text"
                     @click="sendMessage">Send</button>
             </div>
         </div>
@@ -121,39 +121,29 @@ const emit = defineEmits(['send']);
 // Props
 
 const props = defineProps({
-    messages: {
-        type: Array,
-        default: () => []
-    },
+    messages: Array,
     currentChatRoom: Object,
-    // friendsProfile: Array,
     currentUser: Object,
-    chat_id: String
+    chat_id: String,
 })
 
-const { messages, chat_id, currentChatRoom } = toRefs(props);
-
+const { messages, chat_id } = toRefs(props);
 
 // EMIT MESSAGES
 const user = computed(() => usePage().props.auth.user).value;
 const socket = io("http://localhost:3000");
 
 // Declare message
-const newMessage = ref('');
-
 const currentMessage = ref({
     text: '',
     user_id: user.id,
     user_name: user.name,
-    chat_id: props?.chat_id
+    chat_id: chat_id.value,
 });
-
 
 const storeMessageAxios = (message, user) => {
     axios.post(route('messages.store'), {
-        text: message,
-        user_id: user.id,
-        chat_id: chat_id.value,
+        ...currentMessage.value
     }).then((response) => {
         if (response.status === 200) {
             console.log(response.data.messages, 'MESAJUL A FOST STOCAT');
@@ -164,49 +154,52 @@ const storeMessageAxios = (message, user) => {
     });
 }
 
-socket.on('new-message', msg => {
-    console.log(msg.chat_id, 'MESAJUL A FOST PRIMIT');
-    console.log(props.chat_id, 'MESAJUL A FOST PRIMIT');
+const getMessages = () => {
+    axios.get(route('messages.index'), {
+        params: {
+            chat_id: chat_id.value
+        }
+    }).then((response) => {
+        if (response.status === 200) {
+            messages.value = response.data.messages;
+        }
+    }).catch((error) => {
+        console.log(error);
+    });
+}
 
-    if (msg.chat_id == props.chat_id) {
+socket.on(`new-message-${chat_id.value}`, (msg) => {
+    console.log('MESAJUL A FOST PRIMIT', msg);
+    console.log(chat_id.value, 'MESAJUL A FOST PRIMIT');
 
-        console.log(msg, 'MESAJUL A FOST PRIMIT');
-        appendMessage(msg);
-    }
+    getMessages();
 });
 
-const emitMessage = () => {
-    // socket.emit('new-message', currentMessage.value);
-
-    emit('send', {
-        text: newMessage.value,
-        user_id: user.id,
-        chat_id: chat_id.value,
-        chatRoom: currentChatRoom.value
-    })
-}
-
-const appendMessage = (msg) => {
-    messages.value.push(msg);
-}
-
+// const emitMessage = () => {
+//     // socket.emit('new-message', currentMessage.value);
+//     emit('send', {
+//         text: newMessage.value,
+//         user_id: user.id,
+//         chat_id: chat_id.value,
+//         chatRoom: props.currentChatRoom
+//     })
+// }
 
 const sendMessage = () => {
-
     if (_.isEmpty(chat_id.value)) {
         // send toast error alert
         alert('You must select a chat');
         return;
     }
-    console.log('chat_id.value in ChatMessages', chat_id.value);
+    console.log('chat_id sendMessage', chat_id.value);
 
-    currentMessage.value.text = newMessage.value;
+    // currentMessage.value.text = newMessage.value;
     // emitMessage();
-    storeMessageAxios(newMessage.value, user);
+    storeMessageAxios(currentMessage.value.text, user);
 
     socket.emit('send-message', currentMessage.value);
 
-    newMessage.value = '';
+    clearMessage();
     scrollToBottom();
 
 }
@@ -227,7 +220,6 @@ const scrollToBottom = () => {
         chatarea.value.scrollTop + chatarea.value.clientHeight !==
         chatarea.value.scrollHeight;
 
-
     setTimeout(() => {
         if (chatarea.value) {
             chatarea.value.scrollTop = chatarea.value.scrollHeight - chatarea.value.clientHeight;
@@ -239,8 +231,8 @@ const scrollToBottom = () => {
 onMounted(() => {
     scrollToBottom();
 })
-// Watchers
 
+// Watchers
 watch(
     // Scroll to bottom
     chat_id,
@@ -251,6 +243,21 @@ watch(
         }, 300);
     }
 );
+
+watch(
+    // Scroll to bottom
+    messages,
+    () => {
+        // console.log('messages.value in WATCH', messages.value);
+        setTimeout(() => {
+            scrollToBottom();
+        }, 100);
+    }
+);
+
+function clearMessage() {
+    currentMessage.value.text = '';
+}
 
 // Helpers
 
@@ -275,10 +282,6 @@ const saveMessage = (message, user) => {
         }
     });
 }
-
-
-
-
 
 */
 </script>

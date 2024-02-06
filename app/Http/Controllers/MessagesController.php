@@ -67,11 +67,13 @@ class MessagesController extends Controller
         return Inertia::render('Chat', $this->newData);
     }
 
+
     /**
      * Store a newly created resource in storage.
      */
     public function storeMessage(StoreMessageRequest $request)
     {
+
         if( null == $chat_id = $request->input('chat_id')) {
             return response(['error' => 'chat_id is missing'], 400);
         }
@@ -134,10 +136,6 @@ class MessagesController extends Controller
         }, $request->get('users_list') ?? []);
 
         $friendsProfile = User::whereIn('id', $usersList)->get()->toArray();
-
-        // user_id: user.id,
-        // users_list: [ friend.id, user.id ],
-        // chat_room: idChat,
 
         if ($chat_id) {
             $chatRoom = ChatRooms::with('messages')->where('id', $chat_id)->orWhere('uid', $chat_id)->first();
